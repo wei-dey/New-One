@@ -59,12 +59,7 @@
 
         />
 
-    <Button
-        android:id="@+id/new_button"
-        android:layout_width="153dp"
-        android:layout_height="52dp"
-        android:text="New Activity"
-        />
+
 
 </RelativeLayout>
 

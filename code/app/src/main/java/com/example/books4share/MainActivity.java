@@ -29,15 +29,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final Button newButton = findViewById(R.id.new_button);
 
-        newButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, NotificationActivity.class);
-                startActivity(intent);
-            }
-        });
         ProjectName = findViewById(R.id.project_name);
         Team = findViewById(R.id.team_name);
         Sentence = findViewById(R.id.statement);
