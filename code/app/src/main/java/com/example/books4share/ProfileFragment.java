@@ -26,11 +26,20 @@ public class ProfileFragment extends DialogFragment {
     private EditText name;
     private EditText phone;
     private EditText address;
+    private ProfileUser Puser;
 
 
     public interface OnFragmentInteractionListener {
         void onOkPressed(ProfileUser Puser);
 
+    }
+
+    static ProfileFragment newInstance(ProfileUser Puser){//pass data from fragment to activity
+        Bundle args = new Bundle();
+        args.putSerializable("Profile", Puser);
+        ProfileFragment fragment = new ProfileFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
@@ -57,6 +66,15 @@ public class ProfileFragment extends DialogFragment {
         address = view.findViewById(R.id.EditAddress);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        Bundle arguments=getArguments();
+
+        //show the profile information on fragment
+        if(arguments != null){
+            Puser = (ProfileUser) arguments.getSerializable("Profile");
+            name.setText(Puser.getUserName());
+            phone.setText(Puser.getPhone());
+            address.setText(Puser.getAddress());
+        }
 
         return builder
                 .setView(view)
@@ -72,8 +90,14 @@ public class ProfileFragment extends DialogFragment {
                                 if((NewName.isEmpty() && NewAddress.isEmpty() && NewPhone.isEmpty())){
                                     listener = null;
                                 }else{
-                                    listener.onOkPressed(new ProfileUser(NewName, NewPhone, NewAddress));
-
+                                    if(Puser != null){
+                                        Puser.setUserName(NewName);
+                                        Puser.setPhone(NewPhone);
+                                        Puser.setAddress(NewAddress);
+                                    }
+                                    else{
+                                        listener.onOkPressed(new ProfileUser(NewName, NewPhone, NewAddress));
+                                    }
 
                                 }}
                         }

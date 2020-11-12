@@ -14,22 +14,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.Map;
+import static com.example.books4share.Signup.SignUpUser;
 
-import static com.example.books4share.Signup.Email;
 
 public class Profile extends AppCompatActivity implements ProfileFragment.OnFragmentInteractionListener{
 
-
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
-    CollectionReference UserCollection = db.collection("Users");
-
-    TextView FullName;
-    TextView Phone;
-    TextView Address;
-    ImageView image;
+    private TextView fullName;
+    private TextView Phone;
+    private TextView Address;
+    private ImageView image;
+    private ProfileUser user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,20 +34,22 @@ public class Profile extends AppCompatActivity implements ProfileFragment.OnFrag
 
         TextView ProfileText = findViewById(R.id.MyProfileText);
 
-        FullName = findViewById(R.id.ShowName);
+        fullName = findViewById(R.id.ShowName);
         Phone = findViewById(R.id.ShowPhone);
         Address = findViewById(R.id.ShowAddress);
         image = findViewById(R.id.HeadPhoto);
 
 
         Button Edit = findViewById(R.id.EditProfile);
-        String UserEmail = intent.getStringExtra(Email);
+        String UserEmail = intent.getStringExtra(SignUpUser);
         ProfileText.setText(UserEmail);
+
+
 
         Edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new ProfileFragment().show(getSupportFragmentManager(), "Product_Information");// pops up teh fragment
+                new ProfileFragment().newInstance(user).show(getSupportFragmentManager(), "Product_Information");// pops up teh fragment
             }
         });
 
@@ -69,6 +65,8 @@ public class Profile extends AppCompatActivity implements ProfileFragment.OnFrag
      */
     @Override
     public void onOkPressed(ProfileUser Puser) {
+
+
     }
 
 
