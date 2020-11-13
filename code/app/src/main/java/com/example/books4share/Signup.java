@@ -17,6 +17,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -36,11 +40,12 @@ public class Signup extends AppCompatActivity {
     private EditText SignupEmail;
     private EditText SignupPassword;
     private EditText SignupConfirm;
-    FloatingActionButton SignupExit;
-    Button LoginButton;
+    private FloatingActionButton SignupExit;
+    private Button LoginButton;
 
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
-    CollectionReference collectionReference = db.collection("Users");
+    FirebaseFirestore db;
+    CollectionReference collectionReference;
+    FirebaseAuth myAuth;
 
 
     @Override
@@ -48,12 +53,17 @@ public class Signup extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.signup_activity);
 
+        myAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+        collectionReference = db.collection("Users");
+
+
         Intent intent = getIntent();
         final String TAG = "SignUp";
 
         initView();
 
-        TestValidEmail(collectionReference);
+        TestValidEmail();
 
         SignupExit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -61,10 +71,6 @@ public class Signup extends AppCompatActivity {
                 finish();
             }
         });
-
-
-
-
     }
 
     public void initView() {
@@ -90,19 +96,8 @@ public class Signup extends AppCompatActivity {
             return strEmail.matches(emailRegex);
         }
     }
-
-    public static int isExist(String strEmail, CollectionReference collection) {
-        if(collection.whereEqualTo("Email", strEmail).get() == null){
-            return 0;
-        }else{
-            return 1;
-        }
-    }
-
-    public void TestValidEmail(final CollectionReference collection){
+    public void TestValidEmail(){
         LoginButton.setOnClickListener(new View.OnClickListener() {
-            int flag = 0;
-
             @Override
             public void onClick(View v) {
                 String EnterEmail = SignupEmail.getText().toString();
@@ -115,39 +110,38 @@ public class Signup extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Password is not same", Toast.LENGTH_SHORT).show();
                     SignupConfirm.setText("");
                     SignupPassword.setText("");
+                }else if(EnterEmail.length() < 6){
+                    Toast.makeText(getApplicationContext(), "Password must be at least 6 characters", Toast.LENGTH_SHORT).show();
+                    SignupConfirm.setText("");
+                    SignupPassword.setText("");
                 } else if (isEmail(EnterEmail) == false) {
                     Toast.makeText(getApplicationContext(), "Invalid Email Address", Toast.LENGTH_SHORT).show();
                     SignupEmail.setText("");
-                }else if(isExist(EnterEmail, collection) == 1 ){
-                    Toast.makeText(getApplicationContext(), "Email existed", Toast.LENGTH_SHORT);
 
                 } else {
-                    HashMap<String, String> Data = new HashMap<>();
-                    if (EnterEmail.length() > 0 && EnterPassword.length() > 0 && EnterConfirm.length() > 0) {
-                        Data.put("Email", EnterEmail);
-                        Data.put("Password", EnterPassword);
-                        collectionReference
-                                .document(EnterEmail)
-                                .set(Data)
-                                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void aVoid) {
-                                        Log.d(TAG, "DocumentSnapshot successfully written!");
-                                        flag = 1;
+                    myAuth.createUserWithEmailAndPassword(EnterEmail, EnterPassword)
+                            .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                    if(task.isSuccessful()){
+                                        Log.d(TAG, "createUserWithEmail:success");
+                                        FirebaseUser user = myAuth.getCurrentUser();
+
+                                        Intent intent = new Intent(Signup.this, SignInfo.class);
+                                        startActivity(intent);
+
+                                    }else{
+                                        Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                                        Toast.makeText(Signup.this, "Authentication failed. Email is already registered",
+                                                Toast.LENGTH_SHORT).show();
+                                        SignupConfirm.setText("");
+                                        SignupPassword.setText("");
+                                        SignupEmail.setText("");
+
                                     }
-                                })
-                                .addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Log.w(TAG, "Error adding document", e);
-                                    }
-                                });
-                    }
-                    if (flag == 1) {
-                        Intent SignInfo = new Intent(Signup.this, SignInfo.class);
-                        SignInfo.putExtra(SignUpUser, EnterEmail);
-                        startActivity(SignInfo);
-                    }
+
+                                }
+                            });
                 }
             }
         });

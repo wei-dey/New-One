@@ -1,9 +1,11 @@
 package com.example.books4share;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -11,6 +13,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -21,10 +28,12 @@ import static com.example.books4share.Signup.SignUpUser;
 
 public class SignInfo extends AppCompatActivity {
 
-    public static final String SignInfo = "SignInfo";
+    public static final String SignUpInfo = "SignInfo";
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     CollectionReference Users = db.collection("Users");
+    FirebaseAuth myAuth = FirebaseAuth.getInstance();
+
 
     private ImageView photo;
     private TextView title;
@@ -34,8 +43,9 @@ public class SignInfo extends AppCompatActivity {
     private EditText inputPhone;
     private TextView AddressText;
     private EditText inputAddress;
-    Button Confirm;
-    Button Clear;
+    private Button Confirm;
+    private Button Clear;
+    private String UserId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,10 +53,9 @@ public class SignInfo extends AppCompatActivity {
         setContentView(R.layout.signup_info);
 
         Intent intent = getIntent();
-        String UserEmail = intent.getStringExtra(SignUpUser);
 
         initView();
-        putDatabase(UserEmail, Users);
+        inputValidation();
 
 
     }
@@ -60,10 +69,46 @@ public class SignInfo extends AppCompatActivity {
         inputPhone = findViewById(R.id.editTextPhone);
         AddressText = findViewById(R.id.text_address);
         inputAddress = findViewById(R.id.editTextAddress);
+        Confirm = findViewById(R.id.ConfirmButton);
+        Clear = findViewById(R.id.ClearButton);
+
 
     }
 
-    public void putDatabase(final String Email, final CollectionReference collection){
+    /**
+     * This method is used to write the profile information on Firestore Cloud
+     * @param strName
+     * @param strPhone
+     * @param strAddress
+     */
+    public void updateProfile(String strName, String strPhone, String strAddress){
+        FirebaseUser user = myAuth.getCurrentUser();
+        UserId = user.getUid();
+        HashMap <String, String> ProfileData = new HashMap<>();
+        ProfileData.put("Name", strName);
+        ProfileData.put("Phone", strPhone);
+        ProfileData.put("Address", strAddress);
+        Users.document(UserId).set(ProfileData).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.d("Profile Update", "DocumentSnapshot successfully written!");
+
+                Intent intent = new Intent(SignInfo.this, Profile.class);
+                startActivity(intent);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.w("Profile Update", "Error writing document", e);
+            }
+        });
+
+    }
+
+    /**
+     * This method is used to check whether the input is right format
+     */
+    public void inputValidation(){
         Confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -74,26 +119,12 @@ public class SignInfo extends AppCompatActivity {
                 if (Name.length() == 0 || Phone.length() == 0 || Address.length() == 0) {
                     Toast.makeText(getApplicationContext(), "Profile Information Missing", Toast.LENGTH_SHORT);
                 }
-                while (Name.length() != 0 && Phone.length() != 0 && Address.length() == 0) {
+                else if (Name.length() != 0 && Phone.length() != 0 && Address.length() != 0) {
                     if (Phone.length() > 10 || Phone.length() < 10) {
                         Toast.makeText(getApplicationContext(), "Phone NUmber is invalid", Toast.LENGTH_SHORT);
                         inputPhone.setText("");
-                        continue;
                     } else {
-                        Map<String, String> Data = new HashMap<>();
-                        Data.put("Full Name", Name);
-                        Data.put("Phone Number", Phone);
-                        Data.put("Address", Address);
-                        collection
-                                .document(Email)
-                                .collection("Profile Information")
-                                .document("Details")
-                                .set(Data);
-
-                        Intent intent = new Intent(SignInfo.this, Profile.class);
-                        intent.putExtra(SignInfo, Email);
-                        startActivity(intent);
-
+                        updateProfile(Name, Phone, Address);
                     }
 
                 }
@@ -105,7 +136,7 @@ public class SignInfo extends AppCompatActivity {
             public void onClick(View v) {
                 inputPhone.setText("");
                 inputAddress.setText("");
-                inputAddress.setText("");
+                inputName.setText("");
             }
         });
 

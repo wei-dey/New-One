@@ -4,26 +4,52 @@ package com.example.books4share;
 import android.content.Intent;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
 
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
+
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
-import static com.example.books4share.Signup.SignUpUser;
+import static com.example.books4share.SignInfo.SignUpInfo;
+public class Profile extends AppCompatActivity{
 
-
-public class Profile extends AppCompatActivity implements ProfileFragment.OnFragmentInteractionListener{
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    CollectionReference Users = db.collection("Users");
+    FirebaseAuth myAuth = FirebaseAuth.getInstance();
 
     private TextView fullName;
-    private TextView Phone;
-    private TextView Address;
+    private TextView PhoneNum;
+    private TextView AddressLoc;
     private ImageView image;
-    private ProfileUser user;
+    private TextView ProfileText;
+    Button Edit;
+    Button Logout;
+
+    private ProfileUser FragmentUser = new ProfileUser();
+
+    
+
+    Button Home;
+    Button Notif;
+    Button Explore;
+
+    private String UserId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,42 +58,86 @@ public class Profile extends AppCompatActivity implements ProfileFragment.OnFrag
 
         Intent intent = getIntent();
 
-        TextView ProfileText = findViewById(R.id.MyProfileText);
+        initView();
+        showInfo();
+        updateInfo();
 
-        fullName = findViewById(R.id.ShowName);
-        Phone = findViewById(R.id.ShowPhone);
-        Address = findViewById(R.id.ShowAddress);
-        image = findViewById(R.id.HeadPhoto);
-
-
-        Button Edit = findViewById(R.id.EditProfile);
-        String UserEmail = intent.getStringExtra(SignUpUser);
-        ProfileText.setText(UserEmail);
-
-
-
-        Edit.setOnClickListener(new View.OnClickListener() {
+        Logout.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                new ProfileFragment().newInstance(user).show(getSupportFragmentManager(), "Product_Information");// pops up teh fragment
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                Intent intent = new Intent(Profile.this, MainActivity.class);
+                startActivity(intent);
             }
         });
 
-        Button Home = findViewById(R.id.Home);
-        Button Notif = findViewById(R.id.Notification);
-        Button Explore = findViewById(R.id.Explore);
+
+    }
+    public void initView(){
+        fullName = findViewById(R.id.ShowName);
+        PhoneNum = findViewById(R.id.ShowPhone);
+        AddressLoc = findViewById(R.id.ShowAddress);
+        image = findViewById(R.id.HeadPhoto);
+        Edit = findViewById(R.id.EditProfile);
+        ProfileText = findViewById(R.id.MyProfileText);
+        ProfileText.setText("My Profile");
+        Logout = findViewById(R.id.btn_SignOut);
+
+        Home = findViewById(R.id.Home);
+        Notif = findViewById(R.id.Notification);
+        Notif.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Profile.this, NotificationActivity.class);
+                startActivity(intent);
+            }
+        });
+        Explore = findViewById(R.id.Explore);
 
     }
 
-    /**
-     *
-     * @param Puser if the user click ok on fragment
-     */
-    @Override
-    public void onOkPressed(ProfileUser Puser) {
 
 
+    public void showInfo() {
+
+       FirebaseUser user = myAuth.getCurrentUser();
+       UserId = user.getUid();
+       Users.addSnapshotListener(new EventListener<QuerySnapshot>() {
+           @Override
+           public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException error) {
+               for(QueryDocumentSnapshot doc: queryDocumentSnapshots)
+               {
+                   Log.d("Success", String.valueOf(doc.getData().get("Name")));
+                   String Name = (String) doc.getData().get("Name");
+                   String Phone = (String) doc.getData().get("Phone");
+                   String Address = (String) doc.getData().get("Address");
+                   fullName.setText(Name);
+                   PhoneNum.setText(Phone);
+                   AddressLoc.setText(Address);
+
+               }
+           }
+       });
     }
+
+
+    public void updateInfo(){
+        Edit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String Username = fullName.getText().toString();
+                String UserPhone = PhoneNum.getText().toString();
+                String UserAddress = AddressLoc.getText().toString();
+                FragmentUser.setUserName(Username);
+                FragmentUser.setPhone(UserPhone);
+                FragmentUser.setAddress(UserAddress);
+                ProfileFragment.newInstance(FragmentUser).show(getSupportFragmentManager(), "Edit Profile");
+                showInfo();
+            }
+        });
+    }
+
+
 
 
 
