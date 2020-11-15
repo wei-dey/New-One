@@ -8,7 +8,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.google.firebase.firestore.CollectionReference;
+
 import com.google.firebase.firestore.FirebaseFirestore;
 
 
@@ -16,14 +16,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = "MainActivity";
-
     TextView ProjectName;
     TextView Team;
     TextView Sentence;
     Button MainLogin;
     Button MainSignup;
 
-    FirebaseFirestore db;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,10 +35,12 @@ public class MainActivity extends AppCompatActivity {
         MainSignup = findViewById(R.id.signup_button);
 
 
-        db = FirebaseFirestore.getInstance();
 
         MainLogin.setOnClickListener(new View.OnClickListener() {
             @Override
+            /**
+             * Set up a listener to function
+             */
             public void onClick(View v) {
 
                 Intent LoginAct = new Intent(MainActivity.this, Login.class);

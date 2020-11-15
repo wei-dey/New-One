@@ -10,9 +10,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".SignInfo"></activity>
-        <activity android:name=".NotificationActivity" />
-        <activity android:name=".AcceptActivity" />
-        <activity android:name=".ViewRequestActivity" />
         <activity android:name=".Profile" />
 
         <activity

@@ -35,6 +35,7 @@ public class SignInfo extends AppCompatActivity {
     FirebaseAuth myAuth = FirebaseAuth.getInstance();
 
 
+
     private ImageView photo;
     private TextView title;
     private TextView NameText;
@@ -59,6 +60,10 @@ public class SignInfo extends AppCompatActivity {
 
 
     }
+
+    /**
+     * This method is to initialize the layout views
+     */
 
     public void initView(){
         photo = findViewById(R.id.imageView2);

@@ -73,6 +73,10 @@ public class Profile extends AppCompatActivity{
 
 
     }
+
+    /**
+     * this method is used to initialize the layout views
+     */
     public void initView(){
         fullName = findViewById(R.id.ShowName);
         PhoneNum = findViewById(R.id.ShowPhone);
@@ -88,8 +92,7 @@ public class Profile extends AppCompatActivity{
         Notif.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(Profile.this, NotificationActivity.class);
-                startActivity(intent);
+
             }
         });
         Explore = findViewById(R.id.Explore);
@@ -97,6 +100,9 @@ public class Profile extends AppCompatActivity{
     }
 
 
+    /**
+     * this method is used to show the profile information from Cloud Firestore
+     */
 
     public void showInfo() {
 
@@ -120,6 +126,11 @@ public class Profile extends AppCompatActivity{
        });
     }
 
+
+    /**
+     * This method is used to set a click listener on Edit button.
+     * If the user click on the button. The activity will call a Fragment to prompt user input new profile information
+     */
 
     public void updateInfo(){
         Edit.setOnClickListener(new View.OnClickListener() {

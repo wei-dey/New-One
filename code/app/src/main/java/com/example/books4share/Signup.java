@@ -73,6 +73,10 @@ public class Signup extends AppCompatActivity {
         });
     }
 
+    /**
+     * This method is used to initialize the layout views.
+     */
+
     public void initView() {
         SignTiltle = findViewById(R.id.signup_text);
         SignEmailText = findViewById(R.id.text_email2);
@@ -85,6 +89,11 @@ public class Signup extends AppCompatActivity {
         LoginButton = findViewById(R.id.signupButton);
     }
 
+    /**
+     * this method is used to test whether the input email is correct format
+     * @param strEmail
+     * @return
+     */
     public static boolean isEmail(String strEmail) {
         String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\." +
                 "[a-zA-Z0-9_+&*-]+)*@" +
@@ -96,6 +105,11 @@ public class Signup extends AppCompatActivity {
             return strEmail.matches(emailRegex);
         }
     }
+
+
+    /**
+     * If the input email and password were all correct, this method will create a new user doc
+     */
     public void TestValidEmail(){
         LoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
